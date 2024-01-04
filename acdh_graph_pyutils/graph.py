@@ -1,6 +1,7 @@
 from typing import TypedDict
-from rdflib import Graph, Literal, URIRef, RDF, RDFS, OWL, Namespace, plugin, ConjunctiveGraph
+from rdflib import Graph, Literal, URIRef, Namespace, plugin, ConjunctiveGraph
 from rdflib.store import Store
+from rdflib.namespace import OWL, RDF, RDFS
 from acdh_graph_pyutils.namespaces import NAMESPACES
 
 
@@ -24,6 +25,7 @@ def create_empty_graph(
 
 
 def create_custom_triple(
+    graph: Graph,
     subject: URIRef,
     predicate: Namespace,
     object: URIRef | Literal,
@@ -31,72 +33,73 @@ def create_custom_triple(
     """
     Returns a rdflib Graph object containing a custom rdflib triple object.
     """
-    g = Graph()
-    g.add((subject, predicate, object))
-    return g
+    graph.add((subject, predicate, object))
+    return graph
 
 
 def create_type_triple(
+    graph: Graph,
     subject: URIRef,
     object: URIRef,
 ) -> Graph:
     """
     Returns a rdflib Graph object containing a RDF.type triple object.
     """
-    g = Graph()
-    g.add((subject, RDF.type, object))
-    return g
+    graph.add((subject, RDF.type, object))
+    return graph
 
 
 def create_label_triple(
+    graph: Graph,
     subject: URIRef,
     object: Literal,
 ) -> Graph:
     """
     Returns a rdflib Graph object containing a RDF.label triple object.
     """
-    g = Graph()
-    g.add((subject, RDFS.label, object))
-    return g
+    graph.add((subject, RDFS.label, object))
+    return graph
 
 
 def create_value_triple(
+    graph: Graph,
     subject: URIRef,
     object: Literal,
 ) -> Graph:
     """
     Returns a rdflib Graph object containing a RDF.value triple object.
     """
-    g = Graph()
-    g.add((subject, RDF.value, object))
-    return g
+    graph.add((subject, RDF.value, object))
+    return graph
 
 
 def create_sameAs_triple(
+    graph: Graph,
     subject: URIRef,
     object: URIRef,
 ) -> Graph:
     """
     Returns a rdflib Graph object containing a OWL.sameAs triple object.
     """
-    g = Graph()
-    g.add((subject, OWL.sameAs, object))
-    return g
+    graph.add((subject, OWL.sameAs, object))
+    return graph
 
 
 def serialize_graph(
     graph: Graph,
     format: str = "ttl",
-    path: str = None,
-) -> None:
+    to_file: str = "./graph.ttl",
+) -> Graph:
     """
     Returns a serialized graph.
     """
-    graph.serialize(path, format=format)
+    if isinstance(to_file, str):
+        graph.serialize(format=format, destination=to_file)
+    return graph.serialize(format=format)
 
 
 def create_memory_store(
-    store: Store,
+    store: Store = Store,
 ) -> Store:
     """
     Returns a memory store.
