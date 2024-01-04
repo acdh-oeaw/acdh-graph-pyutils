@@ -2,10 +2,12 @@ import uuid
 from typing import TypedDict, Union
 from lxml.etree import Element, XMLParser
 from lxml import etree as ET
-from rdflib import Literal, URIRef
+from rdflib import Literal, URIRef, Namespace
 from acdh_tei_pyutils.utils import make_entity_label
 from acdh_graph_pyutils.string_utils import normalize_string
 
+
+GEO = Namespace("http://www.opengis.net/ont/geosparql#")
 
 Nsmap = TypedDict('Nsmap', {
     "key": str,
@@ -26,9 +28,9 @@ DATE_ATTRIBUTE_DICT = {
 
 
 def extract_begin_end(
-    date_object: Union[Element, dict],
-    fill_missing=True,
-    attribute_map=DATE_ATTRIBUTE_DICT,
+    node: Union[Element, dict],
+    fill_missing: bool = True,
+    attribute_map: dict = DATE_ATTRIBUTE_DICT,
 ) -> tuple[Union[str, bool], Union[str, bool]]:
     """
     Returns a tuple of two strings (begin, end) from a date object.
@@ -36,7 +38,7 @@ def extract_begin_end(
     final_start, final_end = None, None
     start, end, when = None, None, None
     for key, value in attribute_map.items():
-        date_value = date_object.get(key)
+        date_value = node.get(key)
         if date_value and value == "start":
             start = date_value
         if date_value and value == "end":
@@ -156,7 +158,7 @@ def create_uri_from_node_tag(
     Extracts node.tag and [optional] node.attribute from a provided lxml.etree.Element and
     returns a rdflib URIRef object.
     """
-    node_tag = node.tag
+    node_tag = node.tag.split("}")[-1].lower()
     if prefix.endswith("/"):
         prefix = prefix[:-1]
     uri_parts = [prefix, node_tag]
@@ -167,34 +169,34 @@ def create_uri_from_node_tag(
         uri_parts.append(str(uuid.uuid4()))
     if number:
         uri_parts.append(str(number))
-    uri = "/".join([x for x in uri_parts if x != ""])
+    uri = "/".join([x for x in uri_parts if x != "" and x is not None])
     return URIRef(uri)
 
 
 def create_uri_from_node_tag_by_custom_sequence(
-    node: list[Element, int],
-    prefix: list[str, int],
-    number: list[int, int] = None,
-    attribute: list[str, int] = "{http://www.w3.org/XML/1998/namespace}id",
-    generate_uuid: list[bool, int] = False,
+    node: list[Element, int] = [False, False],
+    prefix: list[str, int] = [False, False],
+    number: list[int, int] = [False, False],
+    attribute: list[str, int] = ["{http://www.w3.org/XML/1998/namespace}id", False],
+    generate_uuid: list[bool, int] = [False, False],
 ) -> URIRef:
     """
     Extracts node.tag and [optional] node.attribute from a provided lxml.etree.Element.
     [Optional] number and [optional] uuid can be added to the URI.
     Returns a rdflib URIRef object.
     """
-    node_tag = node[0].tag
-    if prefix[0].endswith("/"):
+    arguments = locals()
+    node_tag = node[0].tag.split("}")[-1].lower()
+    if prefix[0] and prefix[0].endswith("/"):
         prefix = prefix[0][:-1]
-    if attribute:
+    if attribute[0]:
         attribute = node[0].attrib[attribute[0]]
-    if generate_uuid:
+    if generate_uuid[0]:
         custom_id = str(uuid.uuid4())
-    if number:
+    if number[0]:
         num = str(number[0])
     # find sequence of arguments [uri_parts] to generate uri
-    arguments = locals()
-    arguments_dict = {value[1]: key for key, value in arguments.items() if value is not None}
+    arguments_dict = {value[1]: key for key, value in arguments.items() if value is not False and value[1] is not False}
     sorted_arguments_dict = dict(sorted(arguments_dict.items()))
     uri_parts = []
     for x in sorted_arguments_dict.values():
@@ -228,7 +230,7 @@ def uri_handling_condition(
 
 def create_literal_from_coordinates(
     node: Element,
-    datatype: URIRef | str = "geo:wktLiteral",
+    datatype: URIRef = GEO['wktLiteral'],
     split_char: str = " ",
 ) -> Literal:
     """

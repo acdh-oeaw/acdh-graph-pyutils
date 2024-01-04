@@ -1,9 +1,8 @@
 import unittest
 import lxml.etree as ET
 
-from lxml.etree import Element
-from rdflib import Graph, Literal, URIRef, Namespace, plugin, ConjunctiveGraph
-from rdflib.namespace import OWL, RDF, RDFS
+from rdflib import Graph, Literal, URIRef, Namespace
+from rdflib.namespace import OWL, RDF
 from acdh_graph_pyutils.namespaces import NAMESPACES
 from acdh_graph_pyutils.graph import (
     create_empty_graph,
@@ -17,79 +16,21 @@ from acdh_graph_pyutils.graph import (
     create_memory_store
 )
 from acdh_graph_pyutils.string_utils import normalize_string, date_to_literal
+from acdh_graph_pyutils.xml import (
+    extract_begin_end,
+    parse_xml,
+    extract_xml_nsmap,
+    get_element_by_xpath,
+    get_elements_by_xpath,
+    create_literal,
+    create_uri_from_node_tag,
+    create_uri_from_node_tag_by_custom_sequence,
+    uri_handling_condition,
+    create_literal_from_coordinates
+)
 
-sample = """
-<TEI xmlns="http://www.tei-c.org/ns/1.0">
-    <person xml:id="DWpers0091" sortKey="Gulbransson_Olaf_Leonhard">
-        <persName xml:lang="fr">
-            <forename>Olaf</forename>
-            <forename type="unused" xml:lang="bg">Leonhard</forename>
-            <surname>Gulbransson</surname>
-        </persName>
-        <birth when="1873-05-26">26. 5. 1873<placeName key="#DWplace00139"
-                >Christiania (Oslo)</placeName></birth>
-        <death>
-            <date notBefore-iso="1905-07-04" when="1955" to="2000">04.07.1905</date>
-            <settlement key="pmb50">
-                <placeName type="pref">Wien</placeName>
-                <location><geo>48.2066 16.37341</geo></location>
-            </settlement>
-        </death>
-        <persName type="pref">Gulbransson, Olaf</persName>
-        <persName type="full">Gulbransson, Olaf Leonhard</persName>
-        <occupation type="prim" n="01">Zeichner und Maler</occupation>
-        <occupation notBefore="1902" notAfter="1944" n="02">Mitarbeiter des <title
-                level="j">Simplicissimus</title></occupation>
-        <idno type="GND">118543539</idno>
-    </person>
-    <place xml:id="DWplace00092">
-        <placeName type="orig_name">Reval (Tallinn)</placeName>
-        <placeName xml:lang="de" type="simple_name">Reval</placeName>
-        <placeName xml:lang="und" type="alt_label">Tallinn</placeName>
-        <idno type="pmb">https://pmb.acdh.oeaw.ac.at/entity/42085/</idno>
-        <idno type="URI" subtype="geonames">https://www.geonames.org/588409</idno>
-        <idno subtype="foobarid">12345</idno>
-        <location><geo>123 456</geo></location>
-    </place>
-    <place xml:id="DWplace00010">
-        <placeName xml:lang="de" type="orig_name">Jaworzno</placeName>
-        <idno type="pmb">https://pmb.acdh.oeaw.ac.at/entity/94280/</idno>
-        <location><geo>123 456 789</geo></location>
-    </place>
-    <org xml:id="DWorg00001">
-        <orgName xml:lang="de" type="orig_name">Stahlhelm</orgName>
-        <orgName xml:lang="de" type="short">Stahlhelm</orgName>
-        <orgName xml:lang="de" type="full">Stahlhelm, Bund der Frontsoldaten</orgName>
-        <idno type="pmb">https://pmb.acdh.oeaw.ac.at/entity/135089/</idno>
-        <idno type="gnd">https://d-nb.info/gnd/63616-2</idno>
-    </org>
-    <org xml:id="DWorg00002">
-        <orgName xml:lang="de" type="orig_name">GDVP</orgName>
-        <orgName xml:lang="de" type="short">GDVP</orgName>
-        <orgName xml:lang="de" type="full">Großdeutsche Volkspartei</orgName>
-        <idno type="pmb">https://pmb.acdh.oeaw.ac.at/entity/135090/</idno>
-        <idno type="gnd">https://d-nb.info/gnd/410560-6</idno>
-    </org>
-    <place xml:id="DWplace00013">
-        <placeName type="orig_name">Radebeul (?)</placeName>
-        <placeName xml:lang="de">Radebeul</placeName>
-        <placeName xml:lang="und" type="alt_label"></placeName>
-        <idno type="pmb">https://pmb.acdh.oeaw.ac.at/entity/45569/</idno>
-    </place>
-    <bibl xml:id="DWbible01113">
-        <title>Hansi4ever</title>
-    </bibl>
-    <person xml:id="hansi12343">
-        <test></test>
-    </person>
-    <person xml:id="onlypersnameelement">
-        <persName>Ronja, Hanna</persName>
-    </person>
-    <person xml:id="maxicosi">
-        <persName><forename>maxi</forename><surname>cosi</surname></persName>
-    </person>
-</TEI>
-"""
+
+GEO = Namespace("http://www.opengis.net/ont/geosparql#")
 
 
 class TestTestTest(unittest.TestCase):
@@ -259,3 +200,119 @@ class TestTestTest(unittest.TestCase):
         self.assertEqual(date_to_literal(date), Literal("undefined", lang="en"))
         date = None
         self.assertEqual(date_to_literal(date), Literal("undefined", lang="en"))
+
+    def test_012_parse_xml(self):
+        xml = parse_xml("./tests/sample.xml")
+        self.assertIsInstance(xml, ET._Element)
+
+    def test_013_extract_xml_nsmap(self):
+        xml = parse_xml("./tests/sample.xml")
+        nsmap = extract_xml_nsmap(xml)
+        self.assertIsInstance(nsmap, dict)
+        self.assertIn("http://www.tei-c.org/ns/1.0", nsmap['xmlns'])
+
+    def test_014_get_element_by_xpath(self):
+        xml = parse_xml("./tests/sample.xml")
+        element = get_element_by_xpath(xml, "//xmlns:person")
+        self.assertIsInstance(element, ET._Element)
+        self.assertIn("DWpers0091", element.attrib['{http://www.w3.org/XML/1998/namespace}id'])
+
+    def test_015_get_elements_by_xpath(self):
+        xml = parse_xml("./tests/sample.xml")
+        elements = get_elements_by_xpath(xml, "//xmlns:person")
+        self.assertIsInstance(elements, list)
+        self.assertEqual(len(elements), 4)
+
+    def test_016_create_literal(self):
+        xml = parse_xml("./tests/sample.xml")
+        element = get_element_by_xpath(xml, "//xmlns:persName")
+        literal = create_literal(
+            node=element,
+            prefix="His name is: ",
+            default_lang="und",
+            enforce_default_lang=True
+        )
+        self.assertIsInstance(literal, Literal)
+        self.assertEqual(literal.value, "His name is: Gulbransson, Olaf Leonhard")
+
+    def test_017_create_uri_from_node_tag(self):
+        xml = parse_xml("./tests/sample.xml")
+        element = get_element_by_xpath(xml, "//xmlns:person")
+        uri = create_uri_from_node_tag(
+            node=element,
+            prefix="http://example.com/",
+            attribute=None
+        )
+        self.assertIsInstance(uri, URIRef)
+        self.assertEqual(uri, URIRef("http://example.com/person"))
+        uri = create_uri_from_node_tag(
+            node=element,
+            prefix="http://example.com/",
+            attribute="{http://www.w3.org/XML/1998/namespace}id"
+        )
+        self.assertIsInstance(uri, URIRef)
+        self.assertEqual(uri, URIRef("http://example.com/person/DWpers0091"))
+        uri = create_uri_from_node_tag(
+            node=element,
+            prefix="http://example.com/",
+            attribute="{http://www.w3.org/XML/1998/namespace}id",
+            number=1
+        )
+        self.assertIsInstance(uri, URIRef)
+        self.assertEqual(uri, URIRef("http://example.com/person/DWpers0091/1"))
+        uri = create_uri_from_node_tag(
+            node=element,
+            prefix="http://example.com/",
+            attribute="{http://www.w3.org/XML/1998/namespace}id",
+            number=1,
+            generate_uuid=True
+        )
+        self.assertIsInstance(uri, URIRef)
+        self.assertIn(URIRef("http://example.com/person/DWpers0091"), uri)
+
+    def test_018_create_uri_from_node_tag_by_custom_sequence(self):
+        xml = parse_xml("./tests/sample.xml")
+        element = get_element_by_xpath(xml, "//xmlns:person")
+        uri = create_uri_from_node_tag_by_custom_sequence(
+            node=[element, 3],
+            prefix=["http://example.com/", 0],
+            attribute=["{http://www.w3.org/XML/1998/namespace}id", 1],
+            number=[2, 2]
+        )
+        self.assertIsInstance(uri, URIRef)
+        self.assertEqual(uri, URIRef("http://example.com/DWpers0091/2/person"))
+
+    def test_019_uri_handling_condition(self):
+        xml = parse_xml("./tests/sample.xml")
+        elements = get_elements_by_xpath(xml, "//xmlns:placeName")
+        result = []
+        for x in elements:
+            condition = uri_handling_condition(
+                node=x,
+                condition_attribute="type",
+                condition_value="orig_name"
+            )
+            self.assertIsInstance(condition, bool)
+            if condition:
+                result.append(x.text)
+        self.assertEqual(result, ["Reval (Tallinn)", "Jaworzno", "Radebeul (?)"])
+
+    def test_020_create_literal_from_coordinates(self):
+        xml = parse_xml("./tests/sample.xml")
+        element = get_element_by_xpath(xml, "//xmlns:geo")
+        literal = create_literal_from_coordinates(
+            node=element,
+            datatype=GEO['wktLiteral'],
+            split_char=" "
+        )
+        self.assertIsInstance(literal, Literal)
+        self.assertEqual(literal, Literal("Point(48.2066 16.37341)", datatype=GEO['wktLiteral']))
+
+    def test_021_extract_begin_end(self):
+        xml = parse_xml("./tests/sample.xml")
+        element = get_element_by_xpath(xml, "//xmlns:date")
+        begin, end = extract_begin_end(node=element)
+        self.assertIsInstance(begin, str)
+        self.assertIsInstance(end, str)
+        self.assertEqual(begin, "1905-07-04")
+        self.assertEqual(end, "2000")

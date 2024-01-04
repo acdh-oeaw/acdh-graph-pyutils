@@ -1,0 +1,70 @@
+<TEI xmlns="http://www.tei-c.org/ns/1.0">
+    <person xml:id="DWpers0091" sortKey="Gulbransson_Olaf_Leonhard">
+        <persName xml:lang="fr">
+            <forename>Olaf</forename>
+            <forename type="unused" xml:lang="bg">Leonhard</forename>
+            <surname>Gulbransson</surname>
+        </persName>
+        <birth when="1873-05-26">26. 5. 1873<placeName key="#DWplace00139"
+                >Christiania (Oslo)</placeName></birth>
+        <death>
+            <date notBefore-iso="1905-07-04" when="1955" to="2000">04.07.1905</date>
+            <settlement key="pmb50">
+                <placeName type="pref">Wien</placeName>
+                <location><geo>48.2066 16.37341</geo></location>
+            </settlement>
+        </death>
+        <persName type="pref">Gulbransson, Olaf</persName>
+        <persName type="full">Gulbransson, Olaf Leonhard</persName>
+        <occupation type="prim" n="01">Zeichner und Maler</occupation>
+        <occupation notBefore="1902" notAfter="1944" n="02">Mitarbeiter des <title
+                level="j">Simplicissimus</title></occupation>
+        <idno type="GND">118543539</idno>
+    </person>
+    <place xml:id="DWplace00092">
+        <placeName type="orig_name">Reval (Tallinn)</placeName>
+        <placeName xml:lang="de" type="simple_name">Reval</placeName>
+        <placeName xml:lang="und" type="alt_label">Tallinn</placeName>
+        <idno type="pmb">https://pmb.acdh.oeaw.ac.at/entity/42085/</idno>
+        <idno type="URI" subtype="geonames">https://www.geonames.org/588409</idno>
+        <idno subtype="foobarid">12345</idno>
+        <location><geo>123 456</geo></location>
+    </place>
+    <place xml:id="DWplace00010">
+        <placeName xml:lang="de" type="orig_name">Jaworzno</placeName>
+        <idno type="pmb">https://pmb.acdh.oeaw.ac.at/entity/94280/</idno>
+        <location><geo>123 456</geo></location>
+    </place>
+    <org xml:id="DWorg00001">
+        <orgName xml:lang="de" type="orig_name">Stahlhelm</orgName>
+        <orgName xml:lang="de" type="short">Stahlhelm</orgName>
+        <orgName xml:lang="de" type="full">Stahlhelm, Bund der Frontsoldaten</orgName>
+        <idno type="pmb">https://pmb.acdh.oeaw.ac.at/entity/135089/</idno>
+        <idno type="gnd">https://d-nb.info/gnd/63616-2</idno>
+    </org>
+    <org xml:id="DWorg00002">
+        <orgName xml:lang="de" type="orig_name">GDVP</orgName>
+        <orgName xml:lang="de" type="short">GDVP</orgName>
+        <orgName xml:lang="de" type="full">Großdeutsche Volkspartei</orgName>
+        <idno type="pmb">https://pmb.acdh.oeaw.ac.at/entity/135090/</idno>
+        <idno type="gnd">https://d-nb.info/gnd/410560-6</idno>
+    </org>
+    <place xml:id="DWplace00013">
+        <placeName type="orig_name">Radebeul (?)</placeName>
+        <placeName xml:lang="de">Radebeul</placeName>
+        <placeName xml:lang="und" type="alt_label"></placeName>
+        <idno type="pmb">https://pmb.acdh.oeaw.ac.at/entity/45569/</idno>
+    </place>
+    <bibl xml:id="DWbible01113">
+        <title>Hansi4ever</title>
+    </bibl>
+    <person xml:id="hansi12343">
+        <test></test>
+    </person>
+    <person xml:id="onlypersnameelement">
+        <persName>Ronja, Hanna</persName>
+    </person>
+    <person xml:id="maxicosi">
+        <persName><forename>maxi</forename><surname>cosi</surname></persName>
+    </person>
+</TEI>
