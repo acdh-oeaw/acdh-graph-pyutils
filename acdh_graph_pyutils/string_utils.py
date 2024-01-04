@@ -30,6 +30,12 @@ def date_to_literal(
             return_value = Literal(date_str, datatype=XSD.gYearMonth)
         elif len(date_str) == 10:
             return_value = Literal(date_str, datatype=XSD.date)
+        elif len(date_str) == 19:
+            return_value = Literal(date_str, datatype=XSD.dateTime)
+        elif len(date_str) == 20:
+            return_value = Literal(date_str, datatype=XSD.dateTime)
+        elif len(date_str) == 25:
+            return_value = Literal(date_str, datatype=XSD.dateTime)
         else:
             return_value = Literal(date_str, datatype=XSD.string)
     return return_value

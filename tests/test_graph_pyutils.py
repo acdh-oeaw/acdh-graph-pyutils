@@ -5,7 +5,6 @@ from lxml.etree import Element
 from rdflib import Graph, Literal, URIRef, Namespace, plugin, ConjunctiveGraph
 from rdflib.namespace import OWL, RDF, RDFS
 from acdh_graph_pyutils.namespaces import NAMESPACES
-
 from acdh_graph_pyutils.graph import (
     create_empty_graph,
     create_custom_triple,
@@ -17,6 +16,7 @@ from acdh_graph_pyutils.graph import (
     create_conjunctive_graph,
     create_memory_store
 )
+from acdh_graph_pyutils.string_utils import normalize_string, date_to_literal
 
 sample = """
 <TEI xmlns="http://www.tei-c.org/ns/1.0">
@@ -228,3 +228,34 @@ class TestTestTest(unittest.TestCase):
         self.assertIsInstance(g, Graph)
         data = serialize_graph(graph=g, format="trig", to_file="009.trig")
         self.assertIn("ns1:identifier", data)
+
+    def test_010_normalize_string(self):
+        string = "  This is a    test   string.  "
+        self.assertEqual(normalize_string(string), "This is a test string.")
+
+    def test_011_date_to_literal(self):
+        date = "2000-01-01"
+        self.assertEqual(date_to_literal(date), Literal("2000-01-01",
+                                                        datatype=URIRef("http://www.w3.org/2001/XMLSchema#date")))
+        date = "2000-01"
+        self.assertEqual(date_to_literal(date), Literal("2000-01",
+                                                        datatype=URIRef("http://www.w3.org/2001/XMLSchema#gYearMonth")))
+        date = "2000"
+        self.assertEqual(date_to_literal(date), Literal("2000",
+                                                        datatype=URIRef("http://www.w3.org/2001/XMLSchema#gYear")))
+        date = "2000-01-01T00:00:00"
+        self.assertEqual(date_to_literal(date), Literal("2000-01-01T00:00:00",
+                                                        datatype=URIRef("http://www.w3.org/2001/XMLSchema#dateTime")))
+        date = "2000-01-01T00:00:00Z"
+        self.assertEqual(date_to_literal(date), Literal("2000-01-01T00:00:00Z",
+                                                        datatype=URIRef("http://www.w3.org/2001/XMLSchema#dateTime")))
+        date = "2000-01-01T00:00:00+01:00"
+        self.assertEqual(date_to_literal(date), Literal("2000-01-01T00:00:00+01:00",
+                                                        datatype=URIRef("http://www.w3.org/2001/XMLSchema#dateTime")))
+        date = "Before Christ"
+        self.assertEqual(date_to_literal(date), Literal("Before Christ",
+                                                        datatype=URIRef("http://www.w3.org/2001/XMLSchema#string")))
+        date = ""
+        self.assertEqual(date_to_literal(date), Literal("undefined", lang="en"))
+        date = None
+        self.assertEqual(date_to_literal(date), Literal("undefined", lang="en"))
