@@ -133,3 +133,5 @@ dmypy.json
 *.ipynb
 *.ttl
 *.trig
+
+/baserow

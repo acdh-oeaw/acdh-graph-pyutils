@@ -10,7 +10,7 @@ with open("README.md") as readme_file:
 
 requirements = [
     "rdflib>=6,<7",
-    "acdh-tei-pyutils>=0.30,<1",
+    "acdh-tei-pyutils>=1.4,<2",
     "python-slugify>=5,<8",
 ]
 
@@ -36,6 +36,6 @@ setup(
     test_suite="tests",
     tests_require=[],
     url="https://github.com/acdh-oeaw/acdh-graph-pyutils",
-    version="v0.0.1",
+    version="v0.0.2",
     zip_safe=False,
 )
